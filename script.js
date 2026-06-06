@@ -1,32 +1,45 @@
-let state = {
-  hp: 100,
-  fear: 15,
-  trustKyo: 0,
-  trustSaara: 0,
-  chain: true,
-  scene: "intro"
-};
-
-const story = document.getElementById("story");
-const message = document.getElementById("message");
-const levelTitle = document.getElementById("levelTitle");
+let state = {};
 
 function startGame() {
   document.getElementById("introScreen").classList.add("hidden");
   document.getElementById("gameScreen").classList.remove("hidden");
-  showScene("intro");
+  restartGame();
+}
+
+function restartGame() {
+  state = {
+    hp: 100,
+    hunger: 70,
+    fear: 20,
+    food: 1,
+    survivors: 600,
+    level: 1,
+    kyoAlive: true,
+    kyoTrust: 0,
+    saaraTrust: 0
+  };
+
+  showLevel1();
 }
 
 function updateStats() {
   document.getElementById("playerHp").textContent = state.hp;
-  document.getElementById("stamina").textContent = "N/A";
   document.getElementById("fear").textContent = state.fear;
-  document.getElementById("potions").textContent = "None";
+  document.getElementById("stamina").textContent = state.hunger;
+  document.getElementById("potions").textContent = state.food;
 
-  document.getElementById("enemyName").textContent = "The Grand Selection";
-  document.getElementById("enemyHp").textContent = "???";
-  document.getElementById("enemyIntent").textContent = "Unknown";
-  document.getElementById("enemyStatus").textContent = "Story Mode";
+  document.getElementById("enemyName").textContent = "Survivors Left";
+  document.getElementById("enemyHp").textContent = state.survivors;
+  document.getElementById("enemyIntent").textContent = `Level ${state.level}`;
+  document.getElementById("enemyStatus").textContent = "Grand Selection";
+}
+
+function setText(title, storyText, msg) {
+  document.getElementById("levelTitle").textContent = title;
+  document.getElementById("story").textContent = storyText;
+  document.getElementById("message").textContent = msg;
+  updateStats();
+  checkDeath();
 }
 
 function setChoices(choices) {
@@ -41,398 +54,366 @@ function setChoices(choices) {
   });
 }
 
-function showScene(scene) {
-  state.scene = scene;
+function change(hp, hunger, fear, survivors) {
+  state.hp += hp;
+  state.hunger += hunger;
+  state.fear += fear;
+  state.survivors -= survivors;
+
+  if (state.hunger > 100) state.hunger = 100;
+  if (state.fear < 0) state.fear = 0;
+}
+
+function eatFood(nextScene) {
+  if (state.food <= 0) {
+    document.getElementById("message").textContent = "Ichido reaches for food, but he has none.";
+    return;
+  }
+
+  state.food--;
+  change(10, 30, -8, 0);
+  document.getElementById("message").textContent = "Ichido eats quietly. It is not comfort. It is survival.";
   updateStats();
 
-  if (scene === "intro") {
-    levelTitle.textContent = "Level 1: RGB Trial";
-    story.textContent =
-      "Ichido wakes in a forest with a red band around his wrist. The trees are silent. Too silent. Somewhere in the distance, contestants scream. The Grand Selection has begun.";
-
-    message.textContent =
-      "You are not here to win glory. You are here to survive.";
-
-    setChoices([
-      { text: "Climb a tree and observe", action: () => showScene("tree") },
-      { text: "Run toward the gate", action: () => badChoice("Ichido runs without thinking. A hidden contestant strikes from the bushes.", -25, 15, "ambush") },
-      { text: "Hide behind the rocks", action: () => showScene("rocks") }
-    ]);
-  }
-
-  if (scene === "tree") {
-    story.textContent =
-      "From above, Ichido sees three contestants surrounding a frightened boy. The boy is Kyo. He is shaking, but still holding his band.";
-
-    message.textContent =
-      "Kyo is weak alone. But weak people sometimes notice things strong people miss.";
-
-    setChoices([
-      { text: "Help Kyo immediately", action: () => goodChoice("Ichido drops from the tree and saves Kyo before the attackers finish him.", 0, -5, "meetKyo", "kyo") },
-      { text: "Wait and study the attackers", action: () => showScene("studyAttackers") },
-      { text: "Leave Kyo behind", action: () => badChoice("Ichido walks away. Kyo's scream follows him through the forest.", 0, 25, "kyoDies") }
-    ]);
-  }
-
-  if (scene === "rocks") {
-    story.textContent =
-      "Ichido hides behind jagged rocks. Nearby, he notices footprints circling the area. Someone is baiting scared contestants into a trap.";
-
-    message.textContent =
-      "The surroundings can save you if you pay attention.";
-
-    setChoices([
-      { text: "Use rocks to create noise away from you", action: () => goodChoice("Ichido throws stones into the brush. The hunter moves toward the sound, exposing his back.", 0, -5, "counterHunter") },
-      { text: "Stay completely still", action: () => badChoice("Ichido waits too long. The hunter finds him anyway.", -15, 10, "ambush") },
-      { text: "Sprint out", action: () => badChoice("Ichido sprints into open ground. Bad move.", -20, 10, "ambush") }
-    ]);
-  }
-
-  if (scene === "studyAttackers") {
-    story.textContent =
-      "Ichido watches carefully. One attacker is impatient. One keeps checking the gate. One never turns his back to the trees.";
-
-    message.textContent =
-      "A direct fight is suicide. But the impatient one can be baited.";
-
-    setChoices([
-      { text: "Drop behind the impatient attacker", action: () => goodChoice("Ichido lands silently and wraps his copper chain around the attacker's ankle.", 0, -5, "meetKyo", "kyo") },
-      { text: "Challenge all three", action: () => badChoice("Ichido steps out bravely. Bravery is not strategy.", -35, 20, "ambush") },
-      { text: "Throw branch toward the gate", action: () => goodChoice("The attackers turn toward the sound. Kyo escapes toward Ichido.", 0, -5, "meetKyo", "kyo") }
-    ]);
-  }
-
-  if (scene === "meetKyo") {
-    story.textContent =
-      "Kyo stares at Ichido, breathing hard. He asks, 'Why did you help me?' Ichido does not answer right away. In this tournament, trust can be deadlier than a blade.";
-
-    message.textContent =
-      "Kyo may help later depending on how you treat him.";
-
-    setChoices([
-      { text: "Tell Kyo: stay behind me", action: () => goodChoice("Kyo nods. For the first time, Ichido is not completely alone.", 0, -5, "saaraIntro", "kyo") },
-      { text: "Tell Kyo: I only need your band", action: () => badChoice("Kyo steps back, hurt and afraid. He will remember that.", 0, 10, "saaraIntro") },
-      { text: "Say nothing and keep moving", action: () => showScene("saaraIntro") }
-    ]);
-  }
-
-  if (scene === "kyoDies") {
-    story.textContent =
-      "Kyo dies in the forest. Ichido survives, but the silence feels heavier now. Some deaths are not game overs. Some deaths become ghosts.";
-
-    message.textContent =
-      "Kyo is gone. Future choices will be harder.";
-
-    setChoices([
-      { text: "Keep moving", action: () => showScene("saaraIntro") }
-    ]);
-  }
-
-  if (scene === "counterHunter") {
-    story.textContent =
-      "Ichido uses the rocks and trees to trap the hunter's movement. One clean chain strike drops him. Ichido takes the band and moves deeper into the trial.";
-
-    message.textContent =
-      "Survival is not about strength. It is about seeing the field.";
-
-    setChoices([
-      { text: "Continue", action: () => showScene("saaraIntro") }
-    ]);
-  }
-
-  if (scene === "ambush") {
-    story.textContent =
-      "Ichido survives the ambush, but his body aches. He realizes the Grand Selection punishes careless movement.";
-
-    message.textContent =
-      "HP lost. Fear increased.";
-
-    setChoices([
-      { text: "Continue carefully", action: () => showScene("saaraIntro") }
-    ]);
-  }
-
-  if (scene === "saaraIntro") {
-    levelTitle.textContent = "Level 2: Blindtrust";
-    story.textContent =
-      "The next area is colder. Ichido hears chains dragging across stone. A girl is tied near the center of the arena. Her name is Saara. She looks terrified, but her eyes are sharp.";
-
-    message.textContent =
-      "Saara is not just someone to save. She is someone you must understand.";
-
-    setChoices([
-      { text: "Rush to untie Saara", action: () => badChoice("Ichido rushes forward. A wire trap cuts across his arm.", -20, 15, "saaraTrap") },
-      { text: "Ask Saara what she sees", action: () => goodChoice("Saara whispers: 'The floor. Look at the floor.' Ichido notices the trap lines.", 0, -5, "saaraTrust", "saara") },
-      { text: "Ignore Saara and scan the arena", action: () => showScene("arenaScan") }
-    ]);
-  }
-
-  if (scene === "saaraTrap") {
-    story.textContent =
-      "Saara looks guilty even though it was not her fault. 'I tried to warn you,' she says. Ichido clenches his teeth and studies the arena again.";
-
-    message.textContent =
-      "Pain teaches what panic hides.";
-
-    setChoices([
-      { text: "Listen to Saara now", action: () => goodChoice("Ichido finally listens. Saara guides him around the wires.", 0, -5, "saaraTrust", "saara") },
-      { text: "Blame her", action: () => badChoice("Saara goes quiet. Trust breaks.", 0, 20, "arenaFight") }
-    ]);
-  }
-
-  if (scene === "arenaScan") {
-    story.textContent =
-      "Ichido scans the arena. Dust gathers unnaturally near the center. Thin wires stretch between broken pillars. Saara notices him noticing.";
-
-    message.textContent =
-      "You found the trap without rushing.";
-
-    setChoices([
-      { text: "Signal Saara to stay still", action: () => goodChoice("Saara understands. She stops moving before triggering the wires.", 0, -5, "saaraTrust", "saara") },
-      { text: "Cut all the wires with chain", action: () => badChoice("The chain hits one wire too hard. A blade trap snaps out.", -15, 10, "arenaFight") }
-    ]);
-  }
-
-  if (scene === "saaraTrust") {
-    story.textContent =
-      "Saara says, 'I do not need a hero. I need someone who thinks.' Ichido grips his chain. For a moment, they understand each other.";
-
-    message.textContent =
-      "Saara's trust increased.";
-
-    setChoices([
-      { text: "Use Saara's warning to lure the enemy", action: () => showScene("arenaFightSmart") },
-      { text: "Fight the enemy directly", action: () => badChoice("Ichido charges. The enemy wanted that.", -30, 20, "arenaFight") }
-    ]);
-  }
-
-  if (scene === "arenaFightSmart") {
-    story.textContent =
-      "The enemy steps from the shadows. Ichido pretends not to see the trap wires. Saara plays along, acting scared. The enemy rushes in and trips the arena trap himself.";
-
-    message.textContent =
-      "Smart victory. You used trust and surroundings.";
-
-    setChoices([
-      { text: "Free Saara", action: () => showScene("saaraDeath") }
-    ]);
-  }
-
-  if (scene === "arenaFight") {
-    story.textContent =
-      "The fight is messy. Ichido wins, but barely. Saara watches him with fear instead of trust.";
-
-    message.textContent =
-      "You survived, but survival has a cost.";
-
-    setChoices([
-      { text: "Free Saara", action: () => showScene("saaraDeath") }
-    ]);
-  }
-
-  if (scene === "saaraDeath") {
-    levelTitle.textContent = "Inevitable Death";
-    story.textContent =
-      "Ichido reaches Saara. For one second, it feels like he made the right choice. Then the arena mechanism activates. Saara smiles sadly. 'You were close,' she says.";
-
-    message.textContent =
-      "Some deaths are inevitable. The question is not whether Ichido can save everyone. The question is what their deaths do to him.";
-
-    setChoices([
-      { text: "Hold Saara's hand until the end", action: () => goodChoice("Ichido stays. Saara does not die alone.", 0, 10, "afterSaara", "saara") },
-      { text: "Look away", action: () => badChoice("Ichido looks away, but the sound stays with him.", 0, 25, "afterSaara") },
-      { text: "Promise to remember her", action: () => goodChoice("Ichido promises. Saara's death becomes a wound, not a weakness.", 0, 5, "afterSaara", "saara") }
-    ]);
-  }
-
-  if (scene === "afterSaara") {
-    story.textContent =
-      "The arena opens. Ichido walks forward carrying Saara's final expression in his mind. If Kyo is alive, he waits ahead, shaken but breathing.";
-
-    message.textContent =
-      "Your choices now shape the final encounter.";
-
-    setChoices([
-      { text: "Find Kyo", action: () => showScene(state.trustKyo > 0 ? "kyoReturns" : "kyoDistant") },
-      { text: "Go alone", action: () => showScene("finalAlone") }
-    ]);
-  }
-
-  if (scene === "kyoReturns") {
-    story.textContent =
-      "Kyo returns. He is scared, but he does not run. 'I saw a path near the broken wall,' he says. 'It might help us avoid the main guards.'";
-
-    message.textContent =
-      "Because you helped Kyo, you have another option.";
-
-    setChoices([
-      { text: "Trust Kyo's path", action: () => showScene("secretPath") },
-      { text: "Use Kyo as bait", action: () => badChoice("Kyo realizes what Ichido is doing. His face changes. Trust dies.", 0, 30, "finalAlone") },
-      { text: "Tell Kyo to escape alone", action: () => showScene("kyoEscape") }
-    ]);
-  }
-
-  if (scene === "kyoDistant") {
-    story.textContent =
-      "Kyo is alive, but distant. He does not trust Ichido enough to help. In the Grand Selection, kindness delayed becomes useless.";
-
-    message.textContent =
-      "You lost Kyo's support.";
-
-    setChoices([
-      { text: "Continue alone", action: () => showScene("finalAlone") }
-    ]);
-  }
-
-  if (scene === "secretPath") {
-    story.textContent =
-      "Kyo leads Ichido through a cracked passage behind the arena. They avoid two guards and reach the final gate. But one enforcer waits there, smiling.";
-
-    message.textContent =
-      "Kyo helped you avoid damage. Final encounter begins.";
-
-    setChoices([
-      { text: "Use chain on the gate mechanism", action: () => showScene("finalSmart") },
-      { text: "Attack the enforcer", action: () => badChoice("The enforcer is stronger. Ichido is thrown into the wall.", -25, 20, "finalFight") },
-      { text: "Tell Kyo to distract him", action: () => showScene("kyoSacrifice") }
-    ]);
-  }
-
-  if (scene === "kyoEscape") {
-    story.textContent =
-      "Ichido tells Kyo to run. Kyo hesitates, then obeys. Ichido faces the final path alone, but his fear is lighter.";
-
-    message.textContent =
-      "Kyo survives because of you.";
-
-    state.fear = Math.max(0, state.fear - 15);
-
-    setChoices([
-      { text: "Face the final gate", action: () => showScene("finalAlone") }
-    ]);
-  }
-
-  if (scene === "kyoSacrifice") {
-    story.textContent =
-      "Kyo distracts the enforcer. It works, but only for a moment. The enforcer strikes him down. Kyo buys Ichido the opening he needs.";
-
-    message.textContent =
-      "Kyo's death was not random. It came from your choice.";
-
-    state.fear += 20;
-
-    setChoices([
-      { text: "Use the opening", action: () => showScene("finalSmart") },
-      { text: "Run to Kyo", action: () => badChoice("Ichido runs to Kyo and loses the opening.", -20, 20, "finalFight") }
-    ]);
-  }
-
-  if (scene === "finalAlone") {
-    story.textContent =
-      "Ichido reaches the final gate alone. The enforcer waits. Without Kyo's path, Ichido is tired. Without Saara's voice, the arena feels colder.";
-
-    message.textContent =
-      "You can still survive, but the cost is higher.";
-
-    setChoices([
-      { text: "Attack directly", action: () => badChoice("Ichido attacks head-on. The enforcer overpowers him.", -35, 25, "finalFight") },
-      { text: "Use broken chains on the floor", action: () => showScene("finalSmart") },
-      { text: "Freeze in fear", action: () => gameOver("Ichido hesitates. The enforcer does not.") }
-    ]);
-  }
-
-  if (scene === "finalFight") {
-    story.textContent =
-      "The enforcer advances. Ichido's body screams in pain. A direct win is impossible. He needs the surroundings.";
-
-    message.textContent =
-      "Think. The room itself is a weapon.";
-
-    setChoices([
-      { text: "Wrap chain around pillar and pull", action: () => showScene("finalSmart") },
-      { text: "Keep trading blows", action: () => gameOver("Ichido fights with strength alone. Strength alone is not enough.") },
-      { text: "Duck behind broken wall", action: () => badChoice("The wall absorbs one strike, but cracks apart.", -10, 5, "finalSmart") }
-    ]);
-  }
-
-  if (scene === "finalSmart") {
-    story.textContent =
-      "Ichido wraps his copper chain around the broken gate mechanism. He pulls at the exact moment the enforcer charges. The gate snaps loose and crashes down.";
-
-    message.textContent =
-      "Ichido survives because he thought, trusted, observed, and used the world around him.";
-
-    setChoices([
-      { text: "End Chapter", action: () => showScene("ending") }
-    ]);
-  }
-
-  if (scene === "ending") {
-    levelTitle.textContent = "Ending";
-    story.textContent =
-      "Ichido leaves the trial alive. Kyo, Saara, and every scream in the forest follow him in memory. He did not save everyone. Maybe he never could. But he will carry them.";
-
-    message.textContent =
-      "YOU SURVIVED — To be continued in Neverlasting: Bonds.";
-
-    setChoices([
-      { text: "Restart", action: restartGame }
-    ]);
-  }
-
-  checkGame();
+  setTimeout(nextScene, 900);
 }
 
-function goodChoice(text, hpChange, fearChange, nextScene, person) {
-  state.hp += hpChange;
-  state.fear += fearChange;
-
-  if (person === "kyo") state.trustKyo++;
-  if (person === "saara") state.trustSaara++;
-
-  message.textContent = text;
-  setTimeout(() => showScene(nextScene), 900);
-}
-
-function badChoice(text, hpChange, fearChange, nextScene) {
-  state.hp += hpChange;
-  state.fear += fearChange;
-
-  message.textContent = text;
-  setTimeout(() => showScene(nextScene), 1000);
-}
-
-function checkGame() {
+function checkDeath() {
   updateStats();
 
   if (state.hp <= 0) {
-    gameOver("Ichido's body gives out before he reaches the end.");
+    gameOver("Ichido's body gives out. The Grand Selection does not pause for the weak.");
+  }
+
+  if (state.hunger <= 0) {
+    gameOver("Ichido collapses from hunger. Survival was not only about fighting.");
   }
 
   if (state.fear >= 100) {
-    gameOver("Ichido is still alive, but his mind breaks under the weight of the trial.");
+    gameOver("Ichido is alive, but his mind breaks. He cannot move forward.");
   }
 }
 
 function gameOver(text) {
-  levelTitle.textContent = "Game Over";
-  story.textContent = text;
-  message.textContent = "The Grand Selection does not forgive every mistake.";
+  setText("GAME OVER", text, "Restart and think like Ichido would.");
+  setChoices([{ text: "Restart", action: restartGame }]);
+}
+
+/* LEVEL 1 */
+
+function showLevel1() {
+  state.level = 1;
+  setText(
+    "Level 1: RGB Trial",
+    "600 contestants wake across the forest. Ichido opens his eyes with a red band around his wrist. Screams spread between the trees. Everyone needs a matching band. Everyone is prey.",
+    "Goal: survive Level 1. Think before moving."
+  );
 
   setChoices([
-    { text: "Restart", action: restartGame }
+    { text: "Climb a tree and observe", action: level1Tree },
+    { text: "Run toward the gate", action: () => { change(-30, -15, 20, 80); level1Ambush(); } },
+    { text: "Search for food first", action: level1Food }
   ]);
 }
 
-function restartGame() {
-  state = {
-    hp: 100,
-    fear: 15,
-    trustKyo: 0,
-    trustSaara: 0,
-    chain: true,
-    scene: "intro"
-  };
+function level1Food() {
+  change(0, -10, 5, 40);
+  state.food++;
 
-  showScene("intro");
+  setText(
+    "Level 1: Forest Supplies",
+    "Ichido searches the roots and finds a wrapped piece of stale bread beside a fallen contestant. He hates himself for taking it, but hunger does not care about pride.",
+    "Food gained. But time passed. Contestants died."
+  );
+
+  setChoices([
+    { text: "Eat now", action: () => eatFood(level1Tree) },
+    { text: "Save it for later", action: level1Tree }
+  ]);
+}
+
+function level1Tree() {
+  setText(
+    "Level 1: Above the Blood",
+    "From the tree, Ichido sees three contestants surrounding Kyo. Kyo is shaking, but still alive. One attacker watches the gate. One is impatient. One keeps checking the trees.",
+    "This is not a fair fight."
+  );
+
+  setChoices([
+    { text: "Drop onto the impatient attacker", action: () => { state.kyoTrust++; change(0, -10, -5, 90); meetKyo(); } },
+    { text: "Throw a branch toward the gate", action: () => { state.kyoTrust++; change(0, -5, -3, 75); meetKyo(); } },
+    { text: "Leave Kyo behind", action: () => { state.kyoAlive = false; change(0, -5, 25, 100); kyoDiesEarly(); } }
+  ]);
+}
+
+function level1Ambush() {
+  setText(
+    "Level 1: Ambush",
+    "Ichido runs too openly. A contestant slams him into the dirt and reaches for his band. Ichido survives only by wrapping his chain around a root and pulling himself free.",
+    "Bad movement costs HP."
+  );
+
+  setChoices([
+    { text: "Hide and observe now", action: level1Tree },
+    { text: "Keep rushing", action: () => gameOver("Ichido rushes again. This time, three contestants close in. He never reaches the gate.") }
+  ]);
+}
+
+function meetKyo() {
+  setText(
+    "Level 1: Kyo",
+    "Kyo stares at Ichido like he cannot understand why anyone helped him. 'Why?' he asks. Ichido looks at the blood on the leaves and says nothing.",
+    "Kyo may become useful later."
+  );
+
+  setChoices([
+    { text: "Tell Kyo to stay close", action: () => { state.kyoTrust++; level1Gate(); } },
+    { text: "Tell Kyo he owes you", action: () => { state.kyoTrust--; state.fear += 5; level1Gate(); } },
+    { text: "Share food with Kyo", action: () => {
+      if (state.food > 0) {
+        state.food--;
+        state.kyoTrust += 2;
+        change(0, -5, -10, 0);
+      }
+      level1Gate();
+    }}
+  ]);
+}
+
+function kyoDiesEarly() {
+  setText(
+    "Level 1: Kyo's Scream",
+    "Ichido leaves. Kyo screams behind him. The scream stops too quickly. Ichido keeps walking, but something follows him now.",
+    "Kyo is dead. Some choices do not give second chances."
+  );
+
+  setChoices([{ text: "Reach the gate alone", action: level1Gate }]);
+}
+
+function level1Gate() {
+  state.survivors = Math.min(state.survivors, 320);
+
+  setText(
+    "Level 1 Cleared",
+    "The first gate opens. Bodies cover the forest behind Ichido. 600 entered. Far fewer remain.",
+    "Ichido survives Level 1."
+  );
+
+  setChoices([{ text: "Continue to Level 2", action: showLevel2 }]);
+}
+
+/* LEVEL 2 */
+
+function showLevel2() {
+  state.level = 2;
+  state.survivors = 320;
+
+  setText(
+    "Level 2: Blindtrust",
+    "Ichido enters a stone arena. Saara is chained near the center. Thin wires cross the floor. She whispers, 'Do not rush.'",
+    "Goal: survive the trap arena."
+  );
+
+  setChoices([
+    { text: "Ask Saara what she sees", action: () => { state.saaraTrust++; change(0, -5, -5, 50); saaraTrust(); } },
+    { text: "Rush to untie Saara", action: () => { change(-25, -10, 20, 60); saaraTrap(); } },
+    { text: "Use dust to reveal the wires", action: () => { state.saaraTrust++; change(0, -8, -5, 45); saaraTrust(); } }
+  ]);
+}
+
+function saaraTrap() {
+  setText(
+    "Level 2: Wire Trap",
+    "Ichido rushes forward. A wire snaps across his arm. Blood drips onto the stone. Saara shuts her eyes. 'I tried to warn you.'",
+    "Panic almost killed you."
+  );
+
+  setChoices([
+    { text: "Apologize and listen", action: () => { state.saaraTrust++; saaraTrust(); } },
+    { text: "Blame Saara", action: () => { state.saaraTrust--; change(0, 0, 20, 0); level2Enemy(); } }
+  ]);
+}
+
+function saaraTrust() {
+  setText(
+    "Level 2: Saara",
+    "Saara studies the arena while Ichido studies her voice. She is afraid, but not helpless. 'Use the floor,' she says. 'Make him step where you won't.'",
+    "Trust creates strategy."
+  );
+
+  setChoices([
+    { text: "Lure the enemy into the wires", action: () => { change(0, -10, -5, 90); saaraDeath(); } },
+    { text: "Use chain around a pillar", action: () => { change(0, -15, 0, 80); saaraDeath(); } },
+    { text: "Fight directly", action: () => { change(-35, -20, 25, 70); level2Enemy(); } }
+  ]);
+}
+
+function level2Enemy() {
+  setText(
+    "Level 2: Brutal Fight",
+    "Ichido wins, but only after being thrown across the arena. His chain feels heavier. Saara watches him with sadness.",
+    "You survived badly."
+  );
+
+  setChoices([{ text: "Free Saara", action: saaraDeath }]);
+}
+
+function saaraDeath() {
+  state.survivors = 180;
+
+  setText(
+    "Level 2: Inevitable Death",
+    "Ichido reaches Saara. For one second, it feels like he saved her. Then the arena mechanism activates. Saara smiles weakly. 'You were close.'",
+    "Saara cannot be saved. But Ichido can choose how to carry it."
+  );
+
+  setChoices([
+    { text: "Stay with Saara until the end", action: () => { change(0, -5, 10, 0); showLevel3(); } },
+    { text: "Promise to remember her", action: () => { change(0, -5, 5, 0); showLevel3(); } },
+    { text: "Look away", action: () => { change(0, 0, 25, 0); showLevel3(); } }
+  ]);
+}
+
+/* LEVEL 3 */
+
+function showLevel3() {
+  state.level = 3;
+
+  setText(
+    "Level 3: Hunger Maze",
+    "The next level is not a fight. It is worse. A maze of ruined halls, locked food crates, dirty water, and contestants too hungry to think.",
+    "Goal: survive hunger."
+  );
+
+  setChoices([
+    { text: "Eat your food", action: () => eatFood(level3Choice) },
+    { text: "Search crates quietly", action: () => { state.food++; change(0, -15, 5, 40); level3Choice(); } },
+    { text: "Steal from a sleeping contestant", action: () => { state.food += 2; change(0, -10, 20, 70); level3Choice(); } }
+  ]);
+}
+
+function level3Choice() {
+  state.survivors = 95;
+
+  setText(
+    "Level 3: Starving Survivors",
+    "A boy begs Ichido for food. His lips are cracked. His hands shake. Ichido thinks of Nayuri. He thinks of Saara. He thinks of himself.",
+    "Food is life here."
+  );
+
+  setChoices([
+    { text: "Share a small piece", action: () => {
+      if (state.food > 0) {
+        state.food--;
+        change(0, -5, -5, 0);
+      } else {
+        change(0, -10, 10, 0);
+      }
+      showLevel4();
+    }},
+    { text: "Keep everything", action: () => { change(0, 0, 15, 0); showLevel4(); } },
+    { text: "Trade food for a route", action: () => {
+      if (state.food > 0) {
+        state.food--;
+        change(0, -5, -10, 0);
+      }
+      showLevel4();
+    }}
+  ]);
+}
+
+/* LEVEL 4 */
+
+function showLevel4() {
+  state.level = 4;
+  state.survivors = 60;
+
+  setText(
+    "Level 4: The Betrayal Field",
+    "Only 60 remain. The arena is open, with broken walls, hanging chains, and mud pits. Kyo appears again if he survived. His face asks one question: can I trust you?",
+    "Goal: reach the final 30."
+  );
+
+  let choices = [
+    { text: "Use broken walls as cover", action: () => { change(0, -10, -5, 20); showLevel5(); } },
+    { text: "Cross the open field", action: () => { change(-40, -20, 30, 25); showLevel5(); } }
+  ];
+
+  if (state.kyoAlive) {
+    choices.push({
+      text: "Work with Kyo",
+      action: () => {
+        if (state.kyoTrust > 0) {
+          change(0, -10, -15, 30);
+        } else {
+          change(-20, -10, 20, 20);
+        }
+        showLevel5();
+      }
+    });
+  }
+
+  setChoices(choices);
+}
+
+/* LEVEL 5 */
+
+function showLevel5() {
+  state.level = 5;
+  state.survivors = 30;
+
+  setText(
+    "Level 5: Final Fifteen",
+    "30 contestants remain. Only 15 can pass. The final gate opens for the ones willing to think, betray, endure, or bleed. Ichido's stomach twists. His chain drags across the ground.",
+    "Goal: become one of the final 15."
+  );
+
+  setChoices([
+    { text: "Use the hanging chains to collapse the bridge", action: finalSmart },
+    { text: "Fight everyone head-on", action: () => gameOver("Ichido fights like strength alone matters. It does not. He is swallowed by the final riot.") },
+    { text: "Hide until the last moment", action: finalHide },
+    { text: "Eat before the final push", action: () => eatFood(showLevel5) }
+  ]);
+}
+
+function finalSmart() {
+  state.survivors = 15;
+  change(0, -20, 10, 0);
+
+  setText(
+    "Victory: One of Fifteen",
+    "Ichido wraps his copper chain around the hanging supports and pulls when the crowd rushes forward. The bridge snaps. Contestants fall. The gate counts the survivors.",
+    "15 remain. Ichido is one of them."
+  );
+
+  setChoices([{ text: "Ending", action: ending }]);
+}
+
+function finalHide() {
+  change(-10, -25, 20, 10);
+
+  if (state.hunger <= 20) {
+    gameOver("Ichido hides too long. Hunger steals his strength before the gate opens.");
+    return;
+  }
+
+  state.survivors = 15;
+
+  setText(
+    "Victory: Barely Alive",
+    "Ichido waits in the mud beneath broken stone. When the final screams fade, he crawls out and crosses the gate with shaking legs.",
+    "15 remain. Ichido survives, but barely."
+  );
+
+  setChoices([{ text: "Ending", action: ending }]);
+}
+
+function ending() {
+  setText(
+    "Ending",
+    "600 entered Level 1. Only 15 survived Level 5. Ichido stands among them, starving, wounded, and changed. Saara's final smile follows him. Kyo's fate follows him. Every choice follows him.",
+    "YOU SURVIVED — To be continued in Neverlasting: Bonds."
+  );
+
+  setChoices([{ text: "Restart", action: restartGame }]);
 }
