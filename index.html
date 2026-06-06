@@ -1,33 +1,61 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Neverlasting: Origins Mini RPG</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="game-box">
+  <div class="overlay"></div>
+
+  <main class="game-box">
     <h1>Neverlasting: Origins</h1>
-    <h2>Mini RPG</h2>
+    <h2 id="levelTitle">The Grand Selection</h2>
 
-    <div id="story">
-      Ichido wakes in the forest. The Grand Selection has begun.
+    <div id="introScreen">
+      <p>
+        Ichido wakes in the forest with a red band around his wrist.
+        The Grand Selection has begun.
+      </p>
+      <p>
+        You cannot just attack. You must manage health, stamina, fear, and timing.
+      </p>
+      <button onclick="startGame()">Begin Trial</button>
     </div>
 
-    <div class="stats">
-      <p>Ichido HP: <span id="playerHp">100</span></p>
-      <p>Enemy HP: <span id="enemyHp">50</span></p>
-      <p>Enemy: <span id="enemyName">Band Hunter</span></p>
-    </div>
+    <div id="gameScreen" class="hidden">
+      <div id="story"></div>
 
-    <div class="buttons">
-      <button onclick="chainStrike()">Chain Strike</button>
-      <button onclick="defend()">Defend</button>
-      <button onclick="powerAttack()">Risky Power Attack</button>
-      <button onclick="restartGame()">Restart</button>
-    </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <h3>Ichido</h3>
+          <p>HP: <span id="playerHp"></span></p>
+          <p>Stamina: <span id="stamina"></span></p>
+          <p>Fear: <span id="fear"></span></p>
+          <p>Potions: <span id="potions"></span></p>
+        </div>
 
-    <p id="message"></p>
-  </div>
+        <div class="stat-card enemy">
+          <h3 id="enemyName"></h3>
+          <p>HP: <span id="enemyHp"></span></p>
+          <p>Intent: <span id="enemyIntent"></span></p>
+          <p>Status: <span id="enemyStatus"></span></p>
+        </div>
+      </div>
+
+      <div class="buttons">
+        <button onclick="chainStrike()">Chain Strike</button>
+        <button onclick="defend()">Defend</button>
+        <button onclick="observe()">Observe</button>
+        <button onclick="powerAttack()">Risky Power Attack</button>
+        <button onclick="usePotion()">Use Potion</button>
+        <button onclick="restartGame()">Restart</button>
+      </div>
+
+      <div id="message"></div>
+    </div>
+  </main>
 
   <script src="script.js"></script>
 </body>
