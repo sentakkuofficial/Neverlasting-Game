@@ -1,78 +1,109 @@
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
   min-height: 100vh;
   background:
-    linear-gradient(rgba(0,0,0,0.75), rgba(20,0,0,0.85)),
+    linear-gradient(rgba(0, 0, 0, 0.82), rgba(35, 0, 0, 0.88)),
     url("https://images.unsplash.com/photo-1511497584788-876760111969?auto=format&fit=crop&w=1600&q=80");
   background-size: cover;
   background-position: center;
   color: white;
-  font-family: Georgia, serif;
+  font-family: Georgia, "Times New Roman", serif;
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 25px;
 }
 
 .game-box {
-  width: 90%;
-  max-width: 850px;
-  background: rgba(10, 10, 10, 0.92);
+  width: 100%;
+  max-width: 900px;
+  background: rgba(8, 8, 8, 0.94);
   border: 2px solid crimson;
   border-radius: 18px;
   padding: 30px;
-  box-shadow: 0 0 35px crimson;
+  box-shadow: 0 0 35px rgba(220, 20, 60, 0.75);
   text-align: center;
 }
 
 h1 {
   color: crimson;
-  font-size: 42px;
-  margin-bottom: 5px;
+  font-size: 44px;
+  margin: 0;
+  letter-spacing: 1px;
 }
 
 h2 {
   color: #ffcccc;
-  margin-top: 0;
+  margin-top: 8px;
+  font-weight: normal;
 }
 
 .hidden {
   display: none;
 }
 
-#story {
-  background: #161616;
+#introScreen {
+  background: #151515;
   border-left: 5px solid crimson;
-  padding: 18px;
-  margin: 20px 0;
-  font-size: 18px;
+  padding: 25px;
+  margin-top: 25px;
+  font-size: 20px;
   line-height: 1.6;
+}
+
+#story {
+  background: #151515;
+  border-left: 5px solid crimson;
+  padding: 22px;
+  margin: 22px 0;
+  font-size: 19px;
+  line-height: 1.7;
+  text-align: left;
+  border-radius: 8px;
 }
 
 .stats-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 15px;
+  margin: 20px 0;
 }
 
 .stat-card {
-  background: #1f1f1f;
+  background: #1d1d1d;
+  border: 1px solid #333;
   border-radius: 12px;
   padding: 15px;
 }
 
+.stat-card h3 {
+  color: #ffcccc;
+  margin-top: 0;
+}
+
 .enemy {
-  border: 1px solid crimson;
+  border-color: crimson;
+}
+
+.buttons {
+  margin-top: 20px;
 }
 
 button {
   background: crimson;
   color: white;
   border: none;
-  padding: 12px 15px;
-  margin: 7px;
+  padding: 13px 18px;
+  margin: 8px;
   border-radius: 8px;
   cursor: pointer;
   font-weight: bold;
+  font-size: 15px;
+  transition: 0.2s;
 }
 
 button:hover {
@@ -80,18 +111,32 @@ button:hover {
   transform: scale(1.04);
 }
 
-button:disabled {
-  background: gray;
-  cursor: not-allowed;
-  transform: none;
+#message {
+  margin-top: 22px;
+  background: #260000;
+  color: #ffd6d6;
+  padding: 18px;
+  border-radius: 10px;
+  min-height: 70px;
+  line-height: 1.6;
+  font-size: 17px;
 }
 
-#message {
-  margin-top: 20px;
-  background: #260000;
-  padding: 15px;
-  border-radius: 10px;
-  min-height: 80px;
-  line-height: 1.6;
-  color: #ffd6d6;
+@media (max-width: 700px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  h1 {
+    font-size: 34px;
+  }
+
+  .game-box {
+    padding: 20px;
+  }
+
+  button {
+    width: 100%;
+    margin: 6px 0;
+  }
 }
