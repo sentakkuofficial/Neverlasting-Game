@@ -3,46 +3,52 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Neverlasting: Origins Story RPG</title>
+  <title>Neverlasting: Origins Survival RPG</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <main class="game-box">
-    <h1>Neverlasting: Origins</h1>
-    <h2 id="levelTitle">Story RPG</h2>
+    <header>
+      <h1>Neverlasting: Origins</h1>
+      <h2 id="levelTitle">Survival RPG</h2>
+    </header>
 
-    <div id="introScreen">
+    <section id="introScreen" class="panel">
       <p>
-        Ichido wakes inside the Grand Selection. Every choice matters.
-        Some people can be saved. Some deaths are inevitable.
+        600 contestants enter Level 1 of the Grand Selection.
+        Only 15 will survive by the end of Level 5.
       </p>
-      <button onclick="startGame()">Begin Story</button>
-    </div>
+      <p>
+        Play as Ichido. Manage hunger, fear, food, and survival choices.
+        Fighting alone will not save you.
+      </p>
+      <button onclick="startGame()">Begin Grand Selection</button>
+    </section>
 
-    <div id="gameScreen" class="hidden">
-      <section id="story"></section>
+    <section id="gameScreen" class="hidden">
+      <section id="story" class="story-box"></section>
 
       <section class="stats-grid">
         <div class="stat-card">
           <h3>Ichido</h3>
           <p>HP: <span id="playerHp">100</span></p>
-          <p>Fear: <span id="fear">15</span></p>
-          <p>Stamina: <span id="stamina">N/A</span></p>
-          <p>Potions: <span id="potions">None</span></p>
+          <p>Fear: <span id="fear">20</span></p>
+          <p>Hunger: <span id="stamina">70</span></p>
+          <p>Food: <span id="potions">1</span></p>
         </div>
 
-        <div class="stat-card enemy">
-          <h3 id="enemyName">The Grand Selection</h3>
-          <p>Enemy HP: <span id="enemyHp">???</span></p>
-          <p>Intent: <span id="enemyIntent">Unknown</span></p>
-          <p>Status: <span id="enemyStatus">Story Mode</span></p>
+        <div class="stat-card danger">
+          <h3 id="enemyName">Survivors Left</h3>
+          <p>Count: <span id="enemyHp">600</span></p>
+          <p>Current: <span id="enemyIntent">Level 1</span></p>
+          <p>Status: <span id="enemyStatus">Grand Selection</span></p>
         </div>
       </section>
 
       <section class="buttons"></section>
 
-      <section id="message"></section>
-    </div>
+      <section id="message" class="message-box"></section>
+    </section>
   </main>
 
   <script src="script.js"></script>
