@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Neverlasting: Origins Mini RPG</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="game-box">
+    <h1>Neverlasting: Origins</h1>
+    <h2>Mini RPG</h2>
+
+    <div id="story">
+      Ichido wakes in the forest. The Grand Selection has begun.
+    </div>
+
+    <div class="stats">
+      <p>Ichido HP: <span id="playerHp">100</span></p>
+      <p>Enemy HP: <span id="enemyHp">50</span></p>
+      <p>Enemy: <span id="enemyName">Band Hunter</span></p>
+    </div>
+
+    <div class="buttons">
+      <button onclick="chainStrike()">Chain Strike</button>
+      <button onclick="defend()">Defend</button>
+      <button onclick="powerAttack()">Risky Power Attack</button>
+      <button onclick="restartGame()">Restart</button>
+    </div>
+
+    <p id="message"></p>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
